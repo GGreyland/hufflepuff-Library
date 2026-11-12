@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Волшебная Библиотека</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    <title>ПОРЯДОК В БИБЛИОТЕКЕ</title>
     <style>
-        /* Основные стили и фон */
+        /* Основные стили, фон и шрифт Helvetica */
         body, html {
             margin: 0;
             padding: 0;
@@ -21,6 +18,7 @@
             background-size: cover;
             background-position: center;
             user-select: none;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
 
         /* Канвас для магических пылинок */
@@ -42,7 +40,7 @@
             transform: translateX(-50%);
             background: rgba(20, 10, 5, 0.85);
             border: 2px solid #b8860b;
-            border-radius: 15px;
+            border-radius: 10px;
             padding: 15px 40px;
             box-shadow: 0 0 20px rgba(184, 134, 11, 0.5), inset 0 0 15px rgba(184, 134, 11, 0.3);
             z-index: 10;
@@ -51,71 +49,76 @@
         }
 
         h1 {
-            font-family: 'Cinzel Decorative', cursive;
             color: #ffd700;
             margin: 0;
-            font-size: 28px;
-            text-shadow: 0 0 10px #ff8c00;
+            font-size: 26px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.8);
+            font-weight: bold;
         }
 
         p.subtitle {
-            font-family: 'Dancing Script', cursive;
             color: #f5deb3;
-            font-size: 24px;
-            margin: 5px 0 0 0;
+            font-size: 18px;
+            margin: 8px 0 0 0;
+            letter-spacing: 1px;
         }
 
         /* Зона с кучей книг */
         #book-pile {
             position: absolute;
             bottom: 30px;
-            left: 50px;
+            left: 40px;
             width: 350px;
             height: 250px;
             z-index: 5;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px dashed #b8860b;
-            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px dashed rgba(184, 134, 11, 0.5);
+            border-radius: 20px;
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
 
         .pile-label {
             position: absolute;
-            bottom: -30px;
+            bottom: -35px;
             width: 100%;
             text-align: center;
-            font-family: 'Dancing Script', cursive;
             color: #ffd700;
-            font-size: 24px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
             text-shadow: 1px 1px 5px black;
         }
 
-        /* Полки */
+        /* Контейнер полок */
         #shelves-container {
             position: absolute;
             top: 120px;
-            right: 50px;
-            width: 500px;
+            right: 40px;
+            width: calc(100% - 460px); /* Полки занимают все свободное место справа */
+            max-width: 1000px;
             height: calc(100% - 150px);
             z-index: 5;
             display: flex;
             flex-direction: column;
-            gap: 40px;
+            gap: 35px;
         }
 
+        /* Полка */
         .shelf {
             width: 100%;
-            height: 120px;
+            height: 100px;
             background: rgba(43, 23, 11, 0.7);
             border-bottom: 15px solid #3d2314;
             border-radius: 5px;
             box-shadow: 0 10px 15px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.9);
+            /* Flexbox для выстраивания книг в линию */
             display: flex;
-            align-items: flex-end;
-            padding: 0 15px;
+            align-items: flex-end; /* Выравнивание по нижнему краю (идеально ровно) */
+            justify-content: flex-start;
+            flex-wrap: nowrap; /* Запрет на перенос строк, чтобы всегда была одна линия */
+            padding: 0 10px;
             box-sizing: border-box;
-            flex-wrap: wrap-reverse;
-            align-content: flex-start;
             transition: all 0.3s ease;
         }
 
@@ -124,48 +127,51 @@
             border-bottom: 15px solid #6b4423;
         }
 
-        /* Книги */
+        /* Книга в куче (абсолютное позиционирование) */
         .book {
-            width: 25px;
-            height: 90px;
+            width: 18px; /* Узкие, чтобы влезло много */
+            height: 80px;
             border-radius: 3px;
             cursor: grab;
             position: absolute;
             box-shadow: -2px 0 5px rgba(0,0,0,0.6), inset 2px 0 5px rgba(255,255,255,0.2);
-            border: 1px solid rgba(0,0,0,0.5);
-            transition: transform 0.1s;
+            border: 1px solid rgba(0,0,0,0.8);
+            transition: opacity 0.1s;
         }
 
         .book:active {
             cursor: grabbing;
         }
 
-        /* Стили книг на полке (отменяем абсолютное позиционирование) */
+        /* ЖЕСТКИЙ СБРОС для книги, когда она попадает на полку */
         .shelf .book {
-            position: relative;
-            margin-right: 2px;
-            transform: none !important;
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
             bottom: 0 !important;
-            left: 0 !important;
+            transform: none !important; /* Убираем любой наклон */
+            margin-right: 2px !important; /* Отступ между книгами на полке */
+            margin-bottom: 0 !important;
+            flex-shrink: 1; /* Позволяет книгам немного сжаться, если полка переполнена */
         }
 
-        /* Разные цвета обложек с имитацией корешка */
+        /* Цвета обложек */
         .book.red { background: linear-gradient(to right, #601010, #8a1c1c, #601010); }
         .book.blue { background: linear-gradient(to right, #102040, #1c3560, #102040); }
         .book.green { background: linear-gradient(to right, #103015, #1c5025, #103015); }
         .book.brown { background: linear-gradient(to right, #3a2010, #5c331a, #3a2010); }
         .book.purple { background: linear-gradient(to right, #301040, #4f1c6a, #301040); }
 
-        /* Золотые полоски на корешках */
+        /* Декор корешка */
         .book::after {
             content: '';
             position: absolute;
-            top: 15px;
+            top: 12px;
             left: 0;
             width: 100%;
-            height: 5px;
+            height: 4px;
             background: #b8860b;
-            box-shadow: 0 60px 0 #b8860b;
+            box-shadow: 0 50px 0 #b8860b;
             opacity: 0.7;
         }
 
@@ -174,16 +180,17 @@
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 100;
             justify-content: center;
             align-items: center;
             flex-direction: column;
         }
         #victory h2 {
-            font-family: 'Cinzel Decorative', cursive;
             color: #ffd700;
-            font-size: 60px;
+            font-size: 50px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
             text-shadow: 0 0 20px #ff8c00;
             margin-bottom: 10px;
         }
@@ -196,7 +203,7 @@
 
     <!-- UI Панель -->
     <div class="ui-panel">
-        <h1>Древняя Библиотека</h1>
+        <h1>ПОРЯДОК В БИБЛИОТЕКЕ</h1>
         <p class="subtitle">Расставлено книг: <span id="score">0</span> / 200</p>
     </div>
 
@@ -216,8 +223,8 @@
 
     <!-- Экран победы -->
     <div id="victory">
-        <h2>Магия восстановлена!</h2>
-        <p class="subtitle" style="font-size: 30px;">Все 200 книг заняли свои места.</p>
+        <h2>Идеальный порядок!</h2>
+        <p class="subtitle" style="font-size: 24px;">Все 200 книг заняли свои места.</p>
     </div>
 
     <script>
@@ -235,11 +242,11 @@
             book.id = 'book-' + i;
             book.draggable = true;
             
-            // Случайная позиция в куче
-            let angle = Math.random() * 360;
-            let radius = Math.random() * 120;
-            let x = 175 + radius * Math.cos(angle) - 12; // центр (175) минус половина ширины книги
-            let y = 125 + radius * Math.sin(angle) - 45; // центр (125) минус половина высоты
+            // Размещение случайным образом в зоне кучи
+            let angle = Math.random() * Math.PI * 2;
+            let radius = Math.random() * 100;
+            let x = 175 + radius * Math.cos(angle) - 9;  // Центр минус половина ширины
+            let y = 125 + radius * Math.sin(angle) - 40; // Центр минус половина высоты
             let rotation = Math.random() * 180 - 90;
 
             book.style.left = x + 'px';
@@ -247,15 +254,13 @@
             book.style.transform = `rotate(${rotation}deg)`;
             book.style.zIndex = Math.floor(Math.random() * 200);
 
-            // События перетаскивания
             book.addEventListener('dragstart', dragStart);
             pile.appendChild(book);
         }
 
         function dragStart(e) {
             e.dataTransfer.setData("text", e.target.id);
-            // Прячем книгу во время перетаскивания (оставляем только ghost-образ)
-            setTimeout(() => e.target.style.opacity = '0.5', 0);
+            setTimeout(() => e.target.style.opacity = '0.4', 0);
         }
 
         function allowDrop(e) {
@@ -285,14 +290,17 @@
             
             if (book && book.parentElement.id === 'book-pile') {
                 book.style.opacity = '1';
-                shelf.appendChild(book); // Перемещаем книгу на полку (стили сбросятся CSSом)
+                
+                // Перемещаем в DOM. CSS класс '.shelf .book' сделает остальное (выровняет и снимет наклон)
+                shelf.appendChild(book); 
+                
                 placedBooks++;
                 scoreElement.innerText = placedBooks;
                 checkVictory();
             }
         }
 
-        // Возвращаем непрозрачность, если бросили мимо полки
+        // Если бросили мимо полки
         document.addEventListener('dragend', function(e) {
             e.target.style.opacity = '1';
         });
@@ -300,7 +308,7 @@
         function checkVictory() {
             if (placedBooks >= totalBooks) {
                 document.getElementById('victory').style.display = 'flex';
-                createExplosion(); // Магический взрыв частиц
+                createExplosion();
             }
         }
 
@@ -322,15 +330,13 @@
                 this.x = x || Math.random() * width;
                 this.y = y || Math.random() * height;
                 this.size = Math.random() * 2 + 0.5;
-                // Медленное движение вверх для обычной пыли, быстрое во все стороны для взрыва
-                this.vx = isExplosion ? (Math.random() - 0.5) * 10 : (Math.random() - 0.5) * 0.5;
-                this.vy = isExplosion ? (Math.random() - 0.5) * 10 : (Math.random() * -1) - 0.1;
-                this.life = isExplosion ? Math.random() * 100 : 999999;
+                this.vx = isExplosion ? (Math.random() - 0.5) * 12 : (Math.random() - 0.5) * 0.4;
+                this.vy = isExplosion ? (Math.random() - 0.5) * 12 : (Math.random() * -1) - 0.1;
+                this.life = isExplosion ? Math.random() * 80 + 20 : 999999;
                 
-                // Золотые и теплые оттенки
                 const colors = ['#ffd700', '#ffb6c1', '#ffffff', '#ff8c00'];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
-                this.glow = Math.random() * 10;
+                this.glow = Math.random() * 8 + 2;
             }
 
             update() {
@@ -338,7 +344,6 @@
                 this.y += this.vy;
                 this.life--;
 
-                // Если вылетело за экран - возвращаем вниз
                 if (this.y < 0) this.y = height;
                 if (this.x < 0) this.x = width;
                 if (this.x > width) this.x = 0;
@@ -351,17 +356,17 @@
                 ctx.shadowBlur = this.glow;
                 ctx.shadowColor = this.color;
                 ctx.fill();
-                ctx.shadowBlur = 0; // Сбрасываем тень для производительности
+                ctx.shadowBlur = 0; 
             }
         }
 
-        // Создаем фоновую пыль
+        // Фоновая пыль
         for (let i = 0; i < 150; i++) {
             particles.push(new Particle());
         }
 
         function createExplosion() {
-            for (let i = 0; i < 300; i++) {
+            for (let i = 0; i < 400; i++) {
                 particles.push(new Particle(width/2, height/2, true));
             }
         }
