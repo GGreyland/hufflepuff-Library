@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Волшебная Библиотека</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    <style>
+        /* Основные стили и фон */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0705;
+            /* УКАЖИТЕ ПУТЬ К ВАШЕЙ КАРТИНКЕ ЗДЕСЬ */
+            background-image: url('bg.jpg'); 
+            background-size: cover;
+            background-position: center;
+            user-select: none;
+        }
+
+        /* Канвас для магических пылинок */
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* UI и рамки */
+        .ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 10, 5, 0.85);
+            border: 2px solid #b8860b;
+            border-radius: 15px;
+            padding: 15px 40px;
+            box-shadow: 0 0 20px rgba(184, 134, 11, 0.5), inset 0 0 15px rgba(184, 134, 11, 0.3);
+            z-index: 10;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #ffd700;
+            margin: 0;
+            font-size: 28px;
+            text-shadow: 0 0 10px #ff8c00;
+        }
+
+        p.subtitle {
+            font-family: 'Dancing Script', cursive;
+            color: #f5deb3;
+            font-size: 24px;
+            margin: 5px 0 0 0;
+        }
+
+        /* Зона с кучей книг */
+        #book-pile {
+            position: absolute;
+            bottom: 30px;
+            left: 50px;
+            width: 350px;
+            height: 250px;
+            z-index: 5;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed #b8860b;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .pile-label {
+            position: absolute;
+            bottom: -30px;
+            width: 100%;
+            text-align: center;
+            font-family: 'Dancing Script', cursive;
+            color: #ffd700;
+            font-size: 24px;
+            text-shadow: 1px 1px 5px black;
+        }
+
+        /* Полки */
+        #shelves-container {
+            position: absolute;
+            top: 120px;
+            right: 50px;
+            width: 500px;
+            height: calc(100% - 150px);
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .shelf {
+            width: 100%;
+            height: 120px;
+            background: rgba(43, 23, 11, 0.7);
+            border-bottom: 15px solid #3d2314;
+            border-radius: 5px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: flex-end;
+            padding: 0 15px;
+            box-sizing: border-box;
+            flex-wrap: wrap-reverse;
+            align-content: flex-start;
+            transition: all 0.3s ease;
+        }
+
+        .shelf.drag-over {
+            box-shadow: 0 10px 15px rgba(0,0,0,0.8), inset 0 0 30px #b8860b;
+            border-bottom: 15px solid #6b4423;
+        }
+
+        /* Книги */
+        .book {
+            width: 25px;
+            height: 90px;
+            border-radius: 3px;
+            cursor: grab;
+            position: absolute;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.6), inset 2px 0 5px rgba(255,255,255,0.2);
+            border: 1px solid rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+
+        .book:active {
+            cursor: grabbing;
+        }
+
+        /* Стили книг на полке (отменяем абсолютное позиционирование) */
+        .shelf .book {
+            position: relative;
+            margin-right: 2px;
+            transform: none !important;
+            bottom: 0 !important;
+            left: 0 !important;
+        }
+
+        /* Разные цвета обложек с имитацией корешка */
+        .book.red { background: linear-gradient(to right, #601010, #8a1c1c, #601010); }
+        .book.blue { background: linear-gradient(to right, #102040, #1c3560, #102040); }
+        .book.green { background: linear-gradient(to right, #103015, #1c5025, #103015); }
+        .book.brown { background: linear-gradient(to right, #3a2010, #5c331a, #3a2010); }
+        .book.purple { background: linear-gradient(to right, #301040, #4f1c6a, #301040); }
+
+        /* Золотые полоски на корешках */
+        .book::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #b8860b;
+            box-shadow: 0 60px 0 #b8860b;
+            opacity: 0.7;
+        }
+
+        /* Экран победы */
+        #victory {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #victory h2 {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #ffd700;
+            font-size: 60px;
+            text-shadow: 0 0 20px #ff8c00;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Канвас для эффектов -->
+    <canvas id="particles"></canvas>
+
+    <!-- UI Панель -->
+    <div class="ui-panel">
+        <h1>Древняя Библиотека</h1>
+        <p class="subtitle">Расставлено книг: <span id="score">0</span> / 200</p>
+    </div>
+
+    <!-- Куча книг -->
+    <div id="book-pile">
+        <div class="pile-label">Неразобранные книги</div>
+    </div>
+
+    <!-- Полки для книг -->
+    <div id="shelves-container">
+        <div class="shelf" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+        <div class="shelf" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+        <div class="shelf" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+        <div class="shelf" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+        <div class="shelf" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+    </div>
+
+    <!-- Экран победы -->
+    <div id="victory">
+        <h2>Магия восстановлена!</h2>
+        <p class="subtitle" style="font-size: 30px;">Все 200 книг заняли свои места.</p>
+    </div>
+
+    <script>
+        // --- ЛОГИКА ИГРЫ (DRAG & DROP) ---
+        const totalBooks = 200;
+        let placedBooks = 0;
+        const colors = ['red', 'blue', 'green', 'brown', 'purple'];
+        const pile = document.getElementById('book-pile');
+        const scoreElement = document.getElementById('score');
+
+        // Генерация книг
+        for (let i = 0; i < totalBooks; i++) {
+            let book = document.createElement('div');
+            book.className = 'book ' + colors[Math.floor(Math.random() * colors.length)];
+            book.id = 'book-' + i;
+            book.draggable = true;
+            
+            // Случайная позиция в куче
+            let angle = Math.random() * 360;
+            let radius = Math.random() * 120;
+            let x = 175 + radius * Math.cos(angle) - 12; // центр (175) минус половина ширины книги
+            let y = 125 + radius * Math.sin(angle) - 45; // центр (125) минус половина высоты
+            let rotation = Math.random() * 180 - 90;
+
+            book.style.left = x + 'px';
+            book.style.top = y + 'px';
+            book.style.transform = `rotate(${rotation}deg)`;
+            book.style.zIndex = Math.floor(Math.random() * 200);
+
+            // События перетаскивания
+            book.addEventListener('dragstart', dragStart);
+            pile.appendChild(book);
+        }
+
+        function dragStart(e) {
+            e.dataTransfer.setData("text", e.target.id);
+            // Прячем книгу во время перетаскивания (оставляем только ghost-образ)
+            setTimeout(() => e.target.style.opacity = '0.5', 0);
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function dragEnter(e) {
+            e.preventDefault();
+            if(e.currentTarget.classList.contains('shelf')) {
+                e.currentTarget.classList.add('drag-over');
+            }
+        }
+
+        function dragLeave(e) {
+            if(e.currentTarget.classList.contains('shelf')) {
+                e.currentTarget.classList.remove('drag-over');
+            }
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            let shelf = e.currentTarget;
+            shelf.classList.remove('drag-over');
+
+            let bookId = e.dataTransfer.getData("text");
+            let book = document.getElementById(bookId);
+            
+            if (book && book.parentElement.id === 'book-pile') {
+                book.style.opacity = '1';
+                shelf.appendChild(book); // Перемещаем книгу на полку (стили сбросятся CSSом)
+                placedBooks++;
+                scoreElement.innerText = placedBooks;
+                checkVictory();
+            }
+        }
+
+        // Возвращаем непрозрачность, если бросили мимо полки
+        document.addEventListener('dragend', function(e) {
+            e.target.style.opacity = '1';
+        });
+
+        function checkVictory() {
+            if (placedBooks >= totalBooks) {
+                document.getElementById('victory').style.display = 'flex';
+                createExplosion(); // Магический взрыв частиц
+            }
+        }
+
+
+        // --- МАГИЧЕСКИЕ ЧАСТИЦЫ (СВЕТЛЯЧКИ И ПЫЛЬ) ---
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let width, height, particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, isExplosion = false) {
+                this.x = x || Math.random() * width;
+                this.y = y || Math.random() * height;
+                this.size = Math.random() * 2 + 0.5;
+                // Медленное движение вверх для обычной пыли, быстрое во все стороны для взрыва
+                this.vx = isExplosion ? (Math.random() - 0.5) * 10 : (Math.random() - 0.5) * 0.5;
+                this.vy = isExplosion ? (Math.random() - 0.5) * 10 : (Math.random() * -1) - 0.1;
+                this.life = isExplosion ? Math.random() * 100 : 999999;
+                
+                // Золотые и теплые оттенки
+                const colors = ['#ffd700', '#ffb6c1', '#ffffff', '#ff8c00'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.glow = Math.random() * 10;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+
+                // Если вылетело за экран - возвращаем вниз
+                if (this.y < 0) this.y = height;
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = this.glow;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0; // Сбрасываем тень для производительности
+            }
+        }
+
+        // Создаем фоновую пыль
+        for (let i = 0; i < 150; i++) {
+            particles.push(new Particle());
+        }
+
+        function createExplosion() {
+            for (let i = 0; i < 300; i++) {
+                particles.push(new Particle(width/2, height/2, true));
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.update();
+                p.draw();
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+    </script>
+</body>
+</html>
