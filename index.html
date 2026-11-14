@@ -231,6 +231,12 @@
             flex-direction: column;
         }
 
+        /* Специфичный стиль для экрана ПОБЕДЫ (прозрачный фон) */
+        #victory.overlay-screen {
+            background: transparent;
+            backdrop-filter: none;
+        }
+
         .overlay-screen.hidden {
             display: none !important;
         }
@@ -239,6 +245,15 @@
             color: #ffd700; font-size: 36px; text-transform: uppercase;
             letter-spacing: 3px; text-shadow: 0 0 20px #ff8c00; 
             margin: 0 0 15px 0;
+        }
+
+        /* Тени для текста на экране победы (чтобы читалось без фона) */
+        #victory h2 {
+            text-shadow: 2px 2px 8px black, 0 0 20px #ff8c00, 0 0 40px #ff8c00;
+        }
+        #victory .subtitle {
+            text-shadow: 2px 2px 5px black, 0 0 15px black;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -274,7 +289,7 @@
 
     <!-- Экран Старта -->
     <div class="overlay-screen" id="start-screen">
-        <h2>Наведи порядок в библиотеке</h2>
+        <h2>Библиотека магии</h2>
         <button class="btn-overlay" id="start-btn">Начать</button>
     </div>
 
@@ -414,7 +429,8 @@
 
         // --- DRAG & DROP ФУНКЦИИ ---
         function dragStart(e) {
-            if (!gameStarted || isPaused) {
+            // Во время победы dragStart тоже не должен работать
+            if (!gameStarted || isPaused || placedBooks >= totalBooks) {
                 e.preventDefault();
                 return false;
             }
@@ -427,7 +443,7 @@
         function allowDrop(e) { e.preventDefault(); }
 
         function dragEnterZone(e) {
-            if (!gameStarted || isPaused) return;
+            if (!gameStarted || isPaused || placedBooks >= totalBooks) return;
             e.preventDefault();
             e.currentTarget.classList.add('drag-over');
         }
@@ -437,7 +453,7 @@
         }
 
         function dropOnShelf(e) {
-            if (!gameStarted || isPaused) return;
+            if (!gameStarted || isPaused || placedBooks >= totalBooks) return;
             e.preventDefault();
             let shelf = e.currentTarget;
             shelf.classList.remove('drag-over');
@@ -461,7 +477,7 @@
         }
 
         function dropOnPile(e) {
-            if (!gameStarted || isPaused) return;
+            if (!gameStarted || isPaused || placedBooks >= totalBooks) return;
             e.preventDefault();
             let pileZone = e.currentTarget;
             pileZone.classList.remove('drag-over');
